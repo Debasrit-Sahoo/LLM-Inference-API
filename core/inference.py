@@ -1,16 +1,15 @@
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 import torch 
 from config import settings
 from huggingface_hub import login
 
 login(token=settings.huggingface_token)
-
-device = "cpu" if settings.force_cpu else ("cuda" if torch.cuda.is_available() else "cpu")
+quantization_config = BitsAndBytesConfig(load_in_4bit=True)
 
 tokenizer = AutoTokenizer.from_pretrained(settings.model_name)
 model = AutoModelForCausalLM.from_pretrained(
     settings.model_name,
-    dtype=torch.float16,
+    quantization_config=quantization_config,
     device_map="auto"
     )
 
