@@ -20,7 +20,10 @@ X-Internal-Gateway-Auth header verification  (middleware)
 POST /chat  (FastAPI route)
       │
       ▼
-inference queue  (asyncio lock — serialized GPU access)
+asyncio mutex — serialized GPU access, CUDA thread safety guaranteed
+      │
+      ▼
+run_in_executor — blocking inference offloaded to thread pool
       │
       ▼
 tokenize → generate → detokenize  (Mistral 7B 4-bit quantized)
@@ -40,10 +43,12 @@ JSON response
 
 ## Features
 
-- **Gateway authentication** — shared secret header verification on every request
-- **Serialized inference** — asyncio mutex prevents concurrent GPU access and OOM errors
-- **4-bit quantization** — Mistral 7B runs on consumer GPUs with as little as 4GB VRAM
+- **Gateway authentication** — shared secret header verification on every request, including `/health`
+- **Serialized inference** — asyncio mutex guarantees only one `model.generate()` call runs at a time, preventing CUDA thread safety violations and VRAM OOM from concurrent requests
+- **Non-blocking event loop** — inference is offloaded to a thread pool via `run_in_executor`, keeping FastAPI responsive to incoming requests while the GPU is busy
+- **4-bit quantization** — Mistral 7B runs on consumer GPUs with as little as 4GB VRAM, with float16 compute for fast inference
 - **Persistent model cache** — Docker volume prevents re-downloading 14GB of weights on every container start
+- **Health endpoint** — `GET /health` returns service status, protected by gateway auth
 - **Inference timeout** — requests that exceed 300 seconds return a 504 instead of hanging
 - **Input validation** — messages over 4000 characters are rejected before touching the model
 - **Configurable** — model, temperature, top_p, and token limits all controlled via environment variables
@@ -129,7 +134,7 @@ $response.response
 | `MODEL_NAME` | `mistralai/Mistral-7B-Instruct-v0.2` | HuggingFace model identifier |
 | `MAX_NEW_TOKENS` | `512` | Maximum tokens to generate per response |
 | `TEMPERATURE` | `0.7` | Sampling temperature (higher = more random) |
-| `TOP_P` | `0.9` | Nucleus sampling threshold |
+| `TOP_P` = `0.9` | Nucleus sampling threshold |
 | `HUGGINGFACE_TOKEN` | required | HuggingFace access token for gated models |
 
 ## Project Structure
