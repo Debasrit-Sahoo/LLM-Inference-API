@@ -63,7 +63,7 @@ JSON response
 
 **1. Clone the repo**
 ```bash
-git clone https://github.com/yourusername/llm-inference-api
+git clone https://github.com/Debasrit-Sahoo/ai_text_gen
 cd llm-inference-api
 ```
 
