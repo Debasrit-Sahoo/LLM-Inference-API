@@ -6,7 +6,10 @@ from huggingface_hub import login
 
 login(token=settings.huggingface_token)
 
-quantization_config = BitsAndBytesConfig(load_in_4bit=True)
+quantization_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_compute_dtype=torch.float16
+)
 tokenizer = AutoTokenizer.from_pretrained(settings.model_name)
 model = AutoModelForCausalLM.from_pretrained(
     settings.model_name,

@@ -22,7 +22,7 @@ class ChatResponse(BaseModel):
 async def chat(req: ChatRequest):
     async with inference_lock:
         try:
-            loop = asyncio.get_event_loop()
+            loop = asyncio.get_running_loop()
             reply = await asyncio.wait_for(
                 loop.run_in_executor(None, run_inference, req.message),
                 timeout=300
