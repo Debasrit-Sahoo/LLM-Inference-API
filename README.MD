@@ -63,8 +63,8 @@ JSON response
 
 **1. Clone the repo**
 ```bash
-git clone https://github.com/Debasrit-Sahoo/ai_text_gen
-cd llm-inference-api
+git clone https://github.com/Debasrit-Sahoo/LLM-Inference-API
+cd LLM-Inference-API
 ```
 
 **2. Create your `.env` file**
